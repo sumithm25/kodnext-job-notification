@@ -12,7 +12,7 @@ if len(sys.argv) > 1:
     except ValueError:
         pass
 
-ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class UltimateSPAHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):

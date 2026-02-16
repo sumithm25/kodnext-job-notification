@@ -1,16 +1,8 @@
 {
-  "rewrites": [
-    {
-      "source": "/((?!design-system|jobs-data\.js|router\.js|styles\.css|favicon\.ico).*)",
-      "destination": "/app/index.html"
-    },
-    {
-      "source": "/design-system/:match*",
-      "destination": "/app/design-system/:match*"
-    },
-    {
-      "source": "/:filename",
-      "destination": "/app/:filename"
-    }
-  ]
+    "rewrites": [
+        {
+            "source": "/((?!app/|design-system/|favicon.ico).*)",
+            "destination": "/index.html"
+        }
+    ]
 }
