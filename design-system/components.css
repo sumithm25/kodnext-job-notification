@@ -1,0 +1,194 @@
+/**
+ * KodNest Premium Build System — Components
+ * Same hover, same radius. No drop shadows, clean borders.
+ */
+
+/* ─── Buttons ─── */
+.kn-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--kn-space-xs);
+  padding: var(--kn-space-xs) var(--kn-space-sm);
+  font-family: var(--kn-font-sans);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  line-height: 1;
+  border-radius: var(--kn-radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background-color var(--kn-duration) var(--kn-ease),
+              border-color var(--kn-duration) var(--kn-ease),
+              color var(--kn-duration) var(--kn-ease);
+}
+
+.kn-btn:focus-visible {
+  outline: 2px solid var(--kn-border-focus);
+  outline-offset: 2px;
+}
+
+/* Primary: solid deep red */
+.kn-btn--primary {
+  background: var(--kn-accent);
+  color: #fff;
+  border-color: var(--kn-accent);
+}
+
+.kn-btn--primary:hover {
+  background: #6d0000;
+  border-color: #6d0000;
+}
+
+/* Secondary: outlined */
+.kn-btn--secondary {
+  background: transparent;
+  color: var(--kn-text);
+  border-color: var(--kn-border);
+}
+
+.kn-btn--secondary:hover {
+  border-color: var(--kn-text);
+  color: var(--kn-text);
+}
+
+/* Ghost / tertiary for panel actions */
+.kn-btn--ghost {
+  background: transparent;
+  color: var(--kn-text-muted);
+  border-color: transparent;
+}
+
+.kn-btn--ghost:hover {
+  color: var(--kn-text);
+}
+
+/* ─── Status badge (Top Bar right) ─── */
+.kn-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--kn-space-xs) var(--kn-space-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border-radius: var(--kn-radius);
+  border: 1px solid var(--kn-border);
+  background: var(--kn-background);
+  color: var(--kn-text-muted);
+}
+
+.kn-badge--not-started { }
+.kn-badge--in-progress {
+  border-color: var(--kn-warning);
+  color: var(--kn-warning);
+}
+.kn-badge--shipped {
+  border-color: var(--kn-success);
+  color: var(--kn-success);
+}
+
+/* ─── Inputs ─── */
+.kn-input {
+  width: 100%;
+  height: var(--kn-input-height);
+  padding: 0 var(--kn-space-sm);
+  font-family: var(--kn-font-sans);
+  font-size: var(--kn-size-body);
+  color: var(--kn-text);
+  background: var(--kn-background);
+  border: 1px solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  transition: border-color var(--kn-duration) var(--kn-ease);
+}
+
+.kn-input::placeholder {
+  color: var(--kn-text-muted);
+}
+
+.kn-input:hover {
+  border-color: var(--kn-text-muted);
+}
+
+.kn-input:focus {
+  border-color: var(--kn-border-focus);
+  outline: none;
+}
+
+/* ─── Cards ─── */
+.kn-card {
+  padding: var(--kn-space-md);
+  border: 1px solid var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+  transition: border-color var(--kn-duration) var(--kn-ease);
+}
+
+.kn-card:hover {
+  border-color: var(--kn-text-muted);
+}
+
+.kn-card__title {
+  font-family: var(--kn-font-serif);
+  font-size: var(--kn-heading-3);
+  font-weight: var(--kn-heading-weight);
+  margin: 0 0 var(--kn-space-xs);
+}
+
+.kn-card__body {
+  margin: 0;
+  font-size: var(--kn-size-body);
+  line-height: var(--kn-line-height);
+  max-width: var(--kn-text-max-width);
+}
+
+/* ─── Error state ─── */
+.kn-error {
+  padding: var(--kn-space-sm);
+  border: 1px solid var(--kn-accent);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+}
+
+.kn-error__title {
+  font-weight: 600;
+  color: var(--kn-text);
+  margin: 0 0 var(--kn-space-xs);
+}
+
+.kn-error__message {
+  margin: 0 0 var(--kn-space-xs);
+  color: var(--kn-text);
+  font-size: 0.9375rem;
+}
+
+.kn-error__fix {
+  margin: 0;
+  font-size: 0.9375rem;
+  color: var(--kn-text-muted);
+}
+
+/* ─── Empty state ─── */
+.kn-empty {
+  padding: var(--kn-space-lg);
+  text-align: center;
+  border: 1px dashed var(--kn-border);
+  border-radius: var(--kn-radius);
+  background: var(--kn-background);
+}
+
+.kn-empty__title {
+  font-family: var(--kn-font-serif);
+  font-size: var(--kn-heading-3);
+  font-weight: var(--kn-heading-weight);
+  margin: 0 0 var(--kn-space-xs);
+}
+
+.kn-empty__hint {
+  margin: 0 0 var(--kn-space-sm);
+  font-size: 0.9375rem;
+  color: var(--kn-text-muted);
+}
+
+.kn-empty__action {
+  margin-top: var(--kn-space-sm);
+}
+
+/* Secondary panel uses kn-btn--primary (Build), kn-btn--secondary (Copy), kn-btn--ghost (It Worked, Error, Add Screenshot) */

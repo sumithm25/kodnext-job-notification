@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KodNest Premium Build System — Reference</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="design-system.css" />
+</head>
+<body class="kn-page">
+  <!-- Top Bar -->
+  <header class="kn-topbar">
+    <span class="kn-topbar__project">Project Alpha</span>
+    <span class="kn-topbar__progress">Step 2 / 5</span>
+    <span class="kn-badge kn-badge--in-progress">In Progress</span>
+  </header>
+
+  <main class="kn-main">
+    <!-- Context Header -->
+    <section class="kn-context-header">
+      <h1 class="kn-context-header__headline">Define the scope</h1>
+      <p class="kn-context-header__subtext">Describe what you want to build so we can break it into clear steps.</p>
+    </section>
+
+    <!-- Primary Workspace + Secondary Panel -->
+    <div class="kn-workspace-row">
+      <div class="kn-workspace-primary">
+        <div class="kn-card">
+          <h3 class="kn-card__title">Main workspace</h3>
+          <p class="kn-card__body">Primary product interaction lives here. Clean cards, predictable components, no crowding.</p>
+          <p class="kn-card__body">Body text stays within 720px max-width; line-height 1.6–1.8.</p>
+        </div>
+        <div class="kn-card" style="margin-top: var(--kn-space-md);">
+          <h3 class="kn-card__title">Input example</h3>
+          <input type="text" class="kn-input" placeholder="Clean borders, clear focus state" />
+        </div>
+        <div class="kn-error" style="margin-top: var(--kn-space-md);">
+          <p class="kn-error__title">Something went wrong</p>
+          <p class="kn-error__message">The build could not start because the prompt was empty.</p>
+          <p class="kn-error__fix">Add a short description in the prompt box on the right, then try again.</p>
+        </div>
+        <div class="kn-empty" style="margin-top: var(--kn-space-md);">
+          <p class="kn-empty__title">No steps yet</p>
+          <p class="kn-empty__hint">Define your scope above to generate a step-by-step plan.</p>
+          <div class="kn-empty__action">
+            <button type="button" class="kn-btn kn-btn--primary">Define scope</button>
+          </div>
+        </div>
+      </div>
+
+      <aside class="kn-workspace-secondary">
+        <p class="kn-panel__explanation">Short step explanation. One or two lines. Clear purpose, no hype.</p>
+        <textarea class="kn-panel__prompt-box" placeholder="Copyable prompt box. User can copy and paste."></textarea>
+        <div class="kn-panel__actions">
+          <button type="button" class="kn-btn kn-btn--secondary">Copy</button>
+          <button type="button" class="kn-btn kn-btn--primary">Build in Lovable</button>
+          <button type="button" class="kn-btn kn-btn--ghost">It Worked</button>
+          <button type="button" class="kn-btn kn-btn--ghost">Error</button>
+          <button type="button" class="kn-btn kn-btn--ghost">Add Screenshot</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Proof Footer -->
+  <footer class="kn-proof-footer">
+    <label class="kn-proof-footer__item">
+      <input type="checkbox" />
+      <span>UI Built</span>
+    </label>
+    <label class="kn-proof-footer__item">
+      <input type="checkbox" />
+      <span>Logic Working</span>
+    </label>
+    <label class="kn-proof-footer__item">
+      <input type="checkbox" />
+      <span>Test Passed</span>
+    </label>
+    <label class="kn-proof-footer__item">
+      <input type="checkbox" />
+      <span>Deployed</span>
+    </label>
+  </footer>
+
+  <script>
+    // Reference only; no product logic
+  </script>
+</body>
+</html>
