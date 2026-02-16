@@ -4,8 +4,8 @@ import os
 import mimetypes
 import sys
 
-# Default port 3783, can be overridden by arg
-PORT = 3783
+# Default port 4000 (User confirmed this works better than 3783)
+PORT = 4000
 if len(sys.argv) > 1:
     try:
         PORT = int(sys.argv[1])
