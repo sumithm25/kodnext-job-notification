@@ -1,62 +1,86 @@
+import http.server
+import socketserver
 import os
+import mimetypes
 import sys
-from http.server import SimpleHTTPRequestHandler, HTTPServer
 
+# Default port 3783, can be overridden by arg
 PORT = 3783
-# Ensure we are serving the directory containing this script
+if len(sys.argv) > 1:
+    try:
+        PORT = int(sys.argv[1])
+    except ValueError:
+        pass
+
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
 
-class SpaHandler(SimpleHTTPRequestHandler):
-    def __init__(self, *args, **kwargs):
-        # Set the directory explicitly to ensure we serve from the correct place
-        super().__init__(*args, directory=ROOT_DIR, **kwargs)
-
+class UltimateSPAHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
-        # Get the path without query parameters
-        path = self.path.split('?', 1)[0]
-        
-        # Check if the requested path exists as a file
-        # path includes leading '/', so full_path needs handling
-        if path.startswith('/'):
-            rel_path = path[1:]
-        else:
-            rel_path = path
-
-        full_path = os.path.join(ROOT_DIR, rel_path)
-
-        # Debug print
-        print(f"Request: {self.path} | Checking: {full_path}")
-
-        # If it's a file that exists, serve it
-        if os.path.isfile(full_path):
-            print(f"  -> File exists, serving: {rel_path}")
-            super().do_GET()
+        # 1. Handle root
+        if self.path == '/':
+            self.serve_file(os.path.join(ROOT_DIR, 'index.html'))
             return
 
-        # If it's not a file (and not a directory we want to list), fallback to index.html
-        # We assume any non-file request that isn't a specific API/asset is a route
-        print(f"  -> File not found, serving index.html for SPA route")
-        self.path = '/index.html'
-        super().do_GET()
-
-def main():
-    # Allow port to be passed as argument
-    port = PORT
-    if len(sys.argv) > 1:
-        try:
-            port = int(sys.argv[1])
-        except ValueError:
-            pass
+        # 2. Clean path
+        path = self.path.split('?', 1)[0]
+        rel_path = path.lstrip('/')
+        full_path = os.path.join(ROOT_DIR, rel_path)
+        
+        # 3. Check if it is an existing file
+        if os.path.isfile(full_path):
+            self.serve_file(full_path)
+        else:
+            # 4. Fallback to index.html for SPA routes
+            # Heuristic: If it looks like a file (extension) and isn't index.html, 404 it.
+            # This prevents 404ing assets from returning the full HTML app (which causes syntax errors in browser)
+            filename = os.path.basename(path)
+            if '.' in filename and filename != 'index.html':
+                 # Missing static asset -> 404
+                 self.send_error(404, "File not found")
+                 return
             
-    print(f"Starting SPA Server on http://localhost:{port}")
-    print(f"Serving directory: {ROOT_DIR}")
-    
-    server = HTTPServer(('0.0.0.0', port), SpaHandler)
-    try:
-        server.serve_forever()
-    except KeyboardInterrupt:
-        print("\nStopping server...")
-        server.server_close()
+            # SPA Route -> Serve index.html
+            index_path = os.path.join(ROOT_DIR, 'index.html')
+            if os.path.isfile(index_path):
+                self.serve_file(index_path)
+            else:
+                self.send_error(404, "CRITICAL: index.html missing")
 
-if __name__ == '__main__':
-    main()
+    def serve_file(self, file_path):
+        try:
+            with open(file_path, 'rb') as f:
+                content = f.read()
+            
+            mime_type, _ = mimetypes.guess_type(file_path)
+            if not mime_type:
+                if file_path.endswith('.css'): mime_type = 'text/css'
+                elif file_path.endswith('.js'): mime_type = 'application/javascript'
+                elif file_path.endswith('.html'): mime_type = 'text/html'
+                else: mime_type = 'application/octet-stream'
+            
+            # Simple cache control for development
+            self.send_response(200)
+            self.send_header('Content-Type', mime_type)
+            self.send_header('Content-Length', str(len(content)))
+            self.send_header('Cache-Control', 'no-cache')
+            self.end_headers()
+            self.wfile.write(content)
+        except Exception as e:
+            self.send_error(500, f"Internal Server Error: {e}")
+
+    def log_message(self, format, *args):
+        # Verify less noisy logs or custom logging if needed
+        sys.stderr.write("%s - - [%s] %s\n" %
+                         (self.client_address[0],
+                          self.log_date_time_string(),
+                          format%args))
+
+print(f"Starting Job Notification Tracker Server on http://localhost:{PORT}")
+print(f"Serving from: {ROOT_DIR}")
+
+socketserver.TCPServer.allow_reuse_address = True
+with socketserver.TCPServer(("", PORT), UltimateSPAHandler) as httpd:
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        print("\nStopping.")
