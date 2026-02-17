@@ -6,7 +6,7 @@
 class Router {
   constructor() {
     this.routes = {
-      '/': this.renderHome.bind(this),
+      '/': this.renderDigest.bind(this),
       '/dashboard': this.renderDashboard.bind(this),
       '/saved': this.renderSaved.bind(this),
       '/digest': this.renderDigest.bind(this),
