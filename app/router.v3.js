@@ -11,7 +11,9 @@ class Router {
       '/saved': this.renderSaved.bind(this),
       '/digest': this.renderDigest.bind(this),
       '/settings': this.renderSettings.bind(this),
-      '/proof': this.renderProof.bind(this)
+      '/proof': this.renderProof.bind(this),
+      '/jt/07-test': this.renderTest.bind(this),
+      '/jt/08-ship': this.renderShip.bind(this)
     };
 
     this.state = {
@@ -152,6 +154,19 @@ class Router {
         const id = parseInt(el.getAttribute('data-id'), 10);
         const newStatus = el.value;
         this.setStatus(id, newStatus);
+      }
+
+      // Test Checklist Toggle
+      if (el.classList.contains('kn-check-input')) {
+        const key = el.getAttribute('data-key');
+        this.setTestStatus(key, el.checked);
+      }
+    });
+
+    // Reset Test Button
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-action="reset-test"]')) {
+        this.resetTestStatus();
       }
     });
 
@@ -341,21 +356,21 @@ class Router {
   loadPreferences() {
     try {
       const raw = localStorage.getItem("jobTrackerPreferences");
-      return raw ? JSON.parse(raw) : {
-        roleKeywords: "",
-        preferredLocations: "", // text for MVP
-        preferredMode: [], // array of strings
-        experienceLevel: "",
-        skills: "",
+      return {
+        roleKeywords: "Developer, Engineer, Software",
+        preferredLocations: "Bengaluru, Remote",
+        preferredMode: ["Remote", "Hybrid", "On-site"],
+        experienceLevel: "Fresher",
+        skills: "JavaScript, Python, React",
         minMatchScore: 40
       };
     } catch {
       return {
-        roleKeywords: "",
-        preferredLocations: "",
-        preferredMode: [],
-        experienceLevel: "",
-        skills: "",
+        roleKeywords: "Developer, Engineer, Software",
+        preferredLocations: "Bengaluru, Remote",
+        preferredMode: ["Remote", "Hybrid", "On-site"],
+        experienceLevel: "Fresher",
+        skills: "JavaScript, Python, React",
         minMatchScore: 40
       };
     }
@@ -799,6 +814,133 @@ class Router {
       .catch(err => console.error(err));
   }
 
+  // --- Test Checklist System ---
+
+  getTestStatus() {
+    try {
+      const raw = localStorage.getItem("jobTrackerTestStatus");
+      // Default: 10 false flags
+      const defaultStatus = {
+        prefPersist: false,
+        matchCalc: false,
+        showMatches: false,
+        saveJob: false,
+        applyOpen: false,
+        statusPersist: false,
+        statusFilter: false,
+        digestGen: false,
+        digestPersist: false,
+        noConsole: false
+      };
+      return raw ? { ...defaultStatus, ...JSON.parse(raw) } : defaultStatus;
+    } catch {
+      return {};
+    }
+  }
+
+  setTestStatus(key, value) {
+    const status = this.getTestStatus();
+    status[key] = value;
+    localStorage.setItem("jobTrackerTestStatus", JSON.stringify(status));
+    this.handleRoute(); // Re-render to update progress
+  }
+
+  resetTestStatus() {
+    localStorage.removeItem("jobTrackerTestStatus");
+    this.handleRoute();
+  }
+
+  renderTest() {
+    const status = this.getTestStatus();
+    const keys = Object.keys(status);
+    const passedCount = Object.values(status).filter(Boolean).length;
+    const progressPercent = (passedCount / keys.length) * 100;
+
+    const checklistItems = [
+      { key: 'prefPersist', label: 'Preferences persist after refresh', hint: 'Change settings, reload page, check if kept.' },
+      { key: 'matchCalc', label: 'Match score calculates correctly', hint: 'Check if job scores align with your profile.' },
+      { key: 'showMatches', label: '"Show only matches" toggle works', hint: 'Toggle it and verify low scores disappear.' },
+      { key: 'saveJob', label: 'Save job persists after refresh', hint: 'Save a job, reload, check Saved tab.' },
+      { key: 'applyOpen', label: 'Apply opens in new tab', hint: 'Click Apply, ensure new tab opens.' },
+      { key: 'statusPersist', label: 'Status update persists after refresh', hint: 'Change status, reload, verify.' },
+      { key: 'statusFilter', label: 'Status filter works correctly', hint: 'Filter by "Applied" and check results.' },
+      { key: 'digestGen', label: 'Digest generates top 10 by score', hint: 'Verify digest logic in "Daily Digest".' },
+      { key: 'digestPersist', label: 'Digest persists for the day', hint: 'Reload page, digest should be same.' },
+      { key: 'noConsole', label: 'No console errors on main pages', hint: 'F12 > Console. Should be clean.' }
+    ];
+
+    const rows = checklistItems.map(item => `
+          <label class="kn-check-item ${status[item.key] ? 'checked' : ''}">
+              <input type="checkbox" class="kn-check-input" data-key="${item.key}" ${status[item.key] ? 'checked' : ''}>
+              <div>
+                  <div class="kn-check-label">${item.label}</div>
+                  <div class="kn-check-hint">${item.hint}</div>
+              </div>
+          </label>
+      `).join('');
+
+    return `
+        <div class="kn-page">
+           <div class="kn-page__header">
+             <h1 class="kn-page__title">Test Checklist</h1>
+             <p class="kn-page__subtext">Verify all features before shipping.</p>
+           </div>
+
+           <div class="kn-checklist-header">
+               <div style="display:flex; justify-content:space-between; align-items:center;">
+                   <div style="font-weight:700; font-size:18px;">Tests Passed: ${passedCount} / ${keys.length}</div>
+                   <button class="kn-btn kn-btn--secondary" data-action="reset-test" style="font-size:11px;">Reset Status</button>
+               </div>
+               <div class="kn-checklist-progress">
+                   <div class="kn-progress-bar">
+                       <div class="kn-progress-fill" style="width: ${progressPercent}%"></div>
+                   </div>
+                   <div class="kn-progress-text">${Math.round(progressPercent)}%</div>
+               </div>
+               ${passedCount < 10 ? '<div style="margin-top:12px; color:#c62828; font-size:13px; font-weight:500;">Resolve all issues before shipping.</div>' : ''}
+           </div>
+
+           <div class="kn-checklist-grid">
+               ${rows}
+           </div>
+        </div>
+      `;
+  }
+
+  renderShip() {
+    const status = this.getTestStatus();
+    const allPassed = Object.values(status).every(Boolean) && Object.keys(status).length === 10;
+
+    if (!allPassed) {
+      return `
+            <div class="kn-page">
+                 <div class="kn-page__header">
+                   <h1 class="kn-page__title">Locked</h1>
+                 </div>
+                 <div class="kn-locked-overlay">
+                     <div class="kn-lock-icon">🔒</div>
+                     <h2 style="font-size:20px; color:#333; margin-bottom:8px;">Pre-flight Checks Incomplete</h2>
+                     <p style="max-width:400px; margin-bottom:24px;">You must complete the entire checkslist at <a href="/jt/07-test" data-route="/jt/07-test" style="color:var(--kn-accent)">/jt/07-test</a> before you can access the shipping screen.</p>
+                     <button class="kn-btn kn-btn--secondary" data-route="/jt/07-test">Go to Checklist</button>
+                 </div>
+            </div>
+          `;
+    }
+
+    return `
+        <div class="kn-page">
+             <div class="kn-ship-success">
+                 <div class="kn-ship-icon">🚀</div>
+                 <h1 style="font-size:32px; font-family:'Georgia', serif; font-weight:700; margin-bottom:16px; color:#1b5e20;">Ready for Takeoff!</h1>
+                 <p style="font-size:18px; color:#555; max-width:600px; margin:0 auto 32px;">All systems operational. The application has passed all verification checks and is ready to be shipped to production.</p>
+                 <div style="display:flex; gap:16px; justify-content:center;">
+                     <a href="/" data-route="/" class="kn-btn kn-btn--primary" style="padding:12px 24px;">Launch App</a>
+                 </div>
+             </div>
+        </div>
+      `;
+  }
+
   createEmailDraft() {
     const digest = this.getDigest();
     if (!digest) return;
@@ -883,10 +1025,12 @@ class Router {
     `).join('');
 
     const updates = this.getRecentUpdates();
-    const updatesHTML = updates.length === 0 ? '' : `
+    const updatesHTML = `
       <div class="kn-digest-updates">
           <div class="kn-digest-updates__title">Recent Status Updates</div>
-          ${updates.map(u => `
+          ${updates.length === 0
+        ? '<div class="kn-digest-update-item" style="color:#999; font-style:italic; justify-content:center;">No updates yet. Change a job status on the Dashboard to see it here.</div>'
+        : updates.map(u => `
               <div class="kn-digest-update-item">
                   <div>
                       <span style="font-weight:600">${this.escapeHtml(u.title)}</span>
