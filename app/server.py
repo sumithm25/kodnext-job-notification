@@ -78,9 +78,13 @@ class UltimateSPAHandler(http.server.BaseHTTPRequestHandler):
 print(f"Starting Job Notification Tracker Server on http://localhost:{PORT}")
 print(f"Serving from: {ROOT_DIR}")
 
+# Explicitly bind to 0.0.0.0 to ensure accessibility
 socketserver.TCPServer.allow_reuse_address = True
-with socketserver.TCPServer(("", PORT), UltimateSPAHandler) as httpd:
-    try:
+try:
+    with socketserver.TCPServer(("0.0.0.0", PORT), UltimateSPAHandler) as httpd:
+        print(f"Server successfully bound to port {PORT}")
+        print("Press Ctrl+C to stop.")
         httpd.serve_forever()
-    except KeyboardInterrupt:
-        print("\nStopping.")
+except Exception as e:
+    print(f"CRITICAL ERROR: Failed to start server: {e}")
+    sys.exit(1)
