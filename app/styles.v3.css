@@ -892,3 +892,115 @@ h3 {
   justify-content: center;
   margin-top: 16px;
 }
+
+/* Proof Page Styles */
+.kn-proof-section {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.kn-proof-section__title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: #333;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kn-step-list {
+  list-style: none;
+}
+
+.kn-step-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #f9f9f9;
+  font-size: 14px;
+}
+
+.kn-step-item:last-child {
+  border-bottom: none;
+}
+
+.kn-step-status {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  color: #666;
+}
+
+.kn-step-status.done {
+  background: #e8f5e9;
+  color: #1b5e20;
+}
+
+.kn-proof-input-group {
+  margin-bottom: 16px;
+}
+
+.kn-proof-input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #555;
+}
+
+.kn-proof-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+.kn-proof-input:focus {
+  border-color: var(--kn-accent);
+  outline: none;
+}
+
+.kn-proof-badge {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kn-proof-badge--todo {
+  background: #eee;
+  color: #777;
+}
+
+.kn-proof-badge--doing {
+  background: #e3f2fd;
+  color: #1565c0;
+}
+
+.kn-proof-badge--shipped {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+}
+
+.kn-ship-message {
+  text-align: center;
+  margin-top: 32px;
+  padding: 16px;
+  background: #f1f8e9;
+  border-radius: 6px;
+  color: #1b5e20;
+  font-weight: 600;
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}

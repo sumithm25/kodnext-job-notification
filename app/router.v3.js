@@ -31,6 +31,8 @@ class Router {
       preferences: this.loadPreferences(),
       // modal
       modalJobId: null,
+      // proof
+      proof: this.getProofStatus()
     };
 
     this.init();
@@ -167,6 +169,22 @@ class Router {
     document.addEventListener('click', (e) => {
       if (e.target.closest('[data-action="reset-test"]')) {
         this.resetTestStatus();
+      }
+    });
+
+    // Proof Inputs
+    document.addEventListener('input', (e) => {
+      if (e.target.classList.contains('kn-proof-input')) {
+        const field = e.target.getAttribute('data-field');
+        const val = e.target.value;
+        this.saveProofLink(field, val);
+      }
+    });
+
+    // Copy Submission
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('[data-action="copy-submission"]')) {
+        this.copyFinalSubmission();
       }
     });
 
@@ -1131,11 +1149,139 @@ class Router {
     `;
   }
 
+  // --- Final Proof System ---
+
+  getProofStatus() {
+    try {
+      const raw = localStorage.getItem("jobTrackerProof");
+      return raw ? JSON.parse(raw) : { lovable: "", github: "", deploy: "" };
+    } catch {
+      return { lovable: "", github: "", deploy: "" };
+    }
+  }
+
+  saveProofLink(field, value) {
+    this.state.proof[field] = value.trim();
+    localStorage.setItem("jobTrackerProof", JSON.stringify(this.state.proof));
+    // No re-render loop here, just update state. 
+    // Re-render happens via keypress or can be triggered if needed?
+    // Actually, inputs don't need re-render on every keystroke as it kills focus.
+    // But we need to update the Status Badge if all 3 are filled.
+    // Let's rely on the user clicking something or navigating for now, 
+    // OR explicitly check validity to trigger a re-render only when state crosses a threshold?
+    // For simplicity, let's NOT re-render on every keystroke. 
+    // But we DO need to re-render to update the "Shipped" status if they just finished.
+    // Let's debounce or just check.
+    this.handleRoute();
+  }
+
+  copyFinalSubmission() {
+    const p = this.state.proof;
+    const text = `Job Notification Tracker — Final Submission
+
+Lovable Project:
+${p.lovable}
+
+GitHub Repository:
+${p.github}
+
+Live Deployment:
+${p.deploy}
+
+Core Features:
+- Intelligent match scoring
+- Daily digest simulation
+- Status tracking
+- Test checklist enforced`;
+
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Submission copied to clipboard!"))
+      .catch(err => console.error(err));
+  }
+
   renderProof() {
+    const testStatus = this.getTestStatus();
+    const testsPassed = Object.values(testStatus).every(Boolean) && Object.keys(testStatus).length === 10;
+
+    // Links Validation (Basic non-empty check)
+    const p = this.state.proof;
+    const linksValid = p.lovable && p.github && p.deploy;
+
+    // Overall Status
+    let status = "Not Started";
+    let statusClass = "todo";
+
+    if (testsPassed || linksValid) {
+      status = "In Progress";
+      statusClass = "doing";
+    }
+
+    if (testsPassed && linksValid) {
+      status = "Shipped";
+      statusClass = "shipped";
+    }
+
+    const steps = [
+      { label: "Project Setup", done: true },
+      { label: "Python Server", done: true },
+      { label: "Digest Engine", done: true },
+      { label: "Vercel Fix", done: true },
+      { label: "Home Route", done: true },
+      { label: "Status Tracking", done: true },
+      { label: "Test Checklist", done: testsPassed },
+      { label: "Final Proof", done: linksValid }
+    ];
+
+    const stepList = steps.map(s => `
+        <li class="kn-step-item">
+            <span>${s.label}</span>
+            <span class="kn-step-status ${s.done ? 'done' : ''}">${s.done ? 'Completed' : 'Pending'}</span>
+        </li>
+    `).join('');
+
     return `
-      <div class="kn-empty">
-        <p class="kn-empty__title">Proof</p>
-        <p class="kn-empty__hint">Artifact collection will be available here.</p>
+      <div class="kn-page">
+         <div class="kn-page__header">
+           <div style="display:flex; justify-content:space-between; align-items:center;">
+               <h1 class="kn-page__title">Proof of Concept</h1>
+               <span class="kn-proof-badge kn-proof-badge--${statusClass}">${status}</span>
+           </div>
+           <p class="kn-page__subtext">Project 1 — Job Notification Tracker</p>
+         </div>
+
+         <div class="kn-proof-section">
+             <div class="kn-proof-section__title">Step Completion Summary</div>
+             <ul class="kn-step-list">
+                 ${stepList}
+             </ul>
+         </div>
+
+         <div class="kn-proof-section">
+             <div class="kn-proof-section__title">Artifact Collection</div>
+             
+             <div class="kn-proof-input-group">
+                 <label class="kn-proof-input-label">Lovable Project Link</label>
+                 <input type="text" class="kn-proof-input" data-field="lovable" placeholder="https://lovable.dev/..." value="${this.escapeAttr(p.lovable)}">
+             </div>
+
+             <div class="kn-proof-input-group">
+                 <label class="kn-proof-input-label">GitHub Repository Link</label>
+                 <input type="text" class="kn-proof-input" data-field="github" placeholder="https://github.com/..." value="${this.escapeAttr(p.github)}">
+             </div>
+
+             <div class="kn-proof-input-group">
+                 <label class="kn-proof-input-label">Deployed URL</label>
+                 <input type="text" class="kn-proof-input" data-field="deploy" placeholder="https://..." value="${this.escapeAttr(p.deploy)}">
+             </div>
+         </div>
+
+         <div style="text-align:center;">
+             <button class="kn-btn kn-btn--primary" data-action="copy-submission" ${status !== 'Shipped' ? 'disabled style="opacity:0.5; cursor:not-allowed;" title="Complete all steps to enable"' : ''}>
+                 Copy Final Submission
+             </button>
+         </div>
+
+         ${status === 'Shipped' ? '<div class="kn-ship-message">Project 1 Shipped Successfully.</div>' : ''}
       </div>
     `;
   }
