@@ -4,5 +4,16 @@
             "source": "/((?!app/|design-system/|favicon.ico).*)",
             "destination": "/index.html"
         }
+    ],
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "no-store, must-revalidate"
+                }
+            ]
+        }
     ]
 }
