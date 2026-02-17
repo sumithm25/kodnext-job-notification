@@ -3,12 +3,32 @@
 ## ✅ Routes Test
 
 Test each route manually:
-- `/` → Should redirect to `/dashboard` ✅
-- `/dashboard` → Shows "Dashboard" placeholder ✅
-- `/saved` → Shows "Saved" placeholder ✅
-- `/digest` → Shows "Digest" placeholder ✅
-- `/settings` → Shows "Settings" placeholder ✅
+- `/` → Should show **Daily Digest** (custom home page) ✅
+- `/dashboard` → Shows Job List with filters ✅
+- `/saved` → Shows Saved Jobs ✅
+- `/digest` → Shows "Digest" UI ✅
+- `/settings` → Shows "Settings" form ✅
 - `/proof` → Shows "Proof" placeholder ✅
+
+## ✅ Daily Digest Engine
+
+- **Generation**: Click "Generate Today's 9AM Digest" -> Displays top 10 matches.
+- **Persistence**: Refresh page -> Digest remains visible.
+- **Actions**:
+    - "Copy to Clipboard" -> Copies formatted text.
+    - "Create Email Draft" -> Opens mail client.
+
+## ✅ Job Status Tracking
+
+- **Status Badges**:
+    - Default: "Not Applied" (Grey)
+    - Change to "Applied" (Blue) / "Rejected" (Red) / "Selected" (Green).
+- **Persistence**: Refresh page -> Status remains.
+- **Filtering**:
+    - Filter by "Applied" -> Shows only applied jobs.
+    - Filter by "Rejected" -> Shows only rejected jobs.
+- **Notifications**:
+    - Check `/digest` bottom section -> Shows recent status updates.
 
 ## ✅ Navigation Highlighting
 
@@ -38,6 +58,6 @@ Test each route manually:
 ## Code Structure
 
 - `index.html` - Entry point with nav structure
-- `router.js` - Client-side routing with History API
-- `styles.css` - Navigation and page styles
+- `router.js` - Client-side routing, state management (Digest, Status), and logic.
+- `styles.css` - Navigation, page, and component styles.
 - Links to `../design-system/design-system.css` ✅
