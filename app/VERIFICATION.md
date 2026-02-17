@@ -58,6 +58,6 @@ Test each route manually:
 ## Code Structure
 
 - `index.html` - Entry point with nav structure
-- `router.v2.js` - Client-side routing, state management (Digest, Status), and logic.
-- `styles.v2.css` - Navigation, page, and component styles.
+- `router.v3.js` - Client-side routing, state management (Digest, Status), and logic.
+- `styles.v3.css` - Navigation, page, and component styles.
 - Links to `../design-system/design-system.css` ✅
