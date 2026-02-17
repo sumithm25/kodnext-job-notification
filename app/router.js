@@ -21,6 +21,7 @@ class Router {
       mode: "All",
       experience: "All",
       source: "All",
+      statusFilter: "All",
       sort: "Latest",
       // toggle
       showMatchesOnly: false,
@@ -127,6 +128,7 @@ class Router {
         mode: "mode",
         experience: "experience",
         source: "source",
+        statusFilter: "statusFilter",
         sort: "sort",
       };
       const key = el.getAttribute("data-filter");
@@ -144,6 +146,12 @@ class Router {
       // Settings Inputs (Auto-save)
       if (el.closest('.kn-settings__form')) {
         this.savePreferencesFromForm();
+      }
+      // Status Change
+      if (el.classList.contains('kn-status-select')) {
+        const id = parseInt(el.getAttribute('data-id'), 10);
+        const newStatus = el.value;
+        this.setStatus(id, newStatus);
       }
     });
 
@@ -247,6 +255,69 @@ class Router {
   closeModal() {
     this.state.modalJobId = null;
     this.rerenderIfDashboardOrSaved();
+  }
+
+  getStatus(jobId) {
+    try {
+      const raw = localStorage.getItem("jobTrackerStatus");
+      const statusMap = raw ? JSON.parse(raw) : {};
+      return statusMap[jobId] || "Not Applied";
+    } catch {
+      return "Not Applied";
+    }
+  }
+
+  setStatus(jobId, status) {
+    try {
+      const raw = localStorage.getItem("jobTrackerStatus");
+      const statusMap = raw ? JSON.parse(raw) : {};
+      statusMap[jobId] = status;
+      localStorage.setItem("jobTrackerStatus", JSON.stringify(statusMap));
+
+      // Find job details for logging
+      const job = this.getJobs().find(j => j.id === jobId);
+      if (job) this.logStatusUpdate(job, status);
+
+      this.rerenderIfDashboardOrSaved();
+    } catch (e) {
+      console.error("Failed to set status", e);
+    }
+  }
+
+  logStatusUpdate(job, status) {
+    if (status === "Not Applied") return; // Don't log reset
+    try {
+      const raw = localStorage.getItem("jobTrackerUpdates");
+      const updates = raw ? JSON.parse(raw) : [];
+
+      const newUpdate = {
+        title: job.title,
+        company: job.company,
+        status: status,
+        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        timestamp: Date.now()
+      };
+
+      // Add to top, keep last 5
+      updates.unshift(newUpdate);
+      const trimmed = updates.slice(0, 5);
+
+      localStorage.setItem("jobTrackerUpdates", JSON.stringify(trimmed));
+
+      // Simple toast
+      alert(`Status updated to: ${status}`);
+    } catch (e) {
+      console.error("Failed to log update", e);
+    }
+  }
+
+  getRecentUpdates() {
+    try {
+      const raw = localStorage.getItem("jobTrackerUpdates");
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
   }
 
   rerenderIfDashboardOrSaved() {
@@ -383,6 +454,10 @@ class Router {
 
     return scoredJobs
       .filter((j) => {
+        // Status Filter
+        const status = this.getStatus(j.id);
+        if (this.state.statusFilter !== "All" && status !== this.state.statusFilter) return false;
+
         // Text Search
         if (q) {
           const hay = `${j.title} ${j.company}`.toLowerCase();
@@ -416,6 +491,7 @@ class Router {
     const modes = ["All", ...this.uniqueOptions("mode")];
     const experiences = ["All", ...this.uniqueOptions("experience")];
     const sources = ["All", ...this.uniqueOptions("source")];
+    const statuses = ["All", "Not Applied", "Applied", "Rejected", "Selected"];
     const sorts = ["Latest", "Match Score", "Oldest", "Company A–Z", "Company Z–A"];
 
     const opt = (arr, val) =>
@@ -449,6 +525,10 @@ class Router {
             <select id="kn-source" class="kn-input" data-filter="source">${opt(sources, this.state.source)}</select>
           </div>
           <div class="kn-filterbar__field">
+            <label class="kn-filterbar__label" for="kn-status">Status</label>
+            <select id="kn-status" class="kn-input" data-filter="statusFilter">${opt(statuses, this.state.statusFilter)}</select>
+          </div>
+          <div class="kn-filterbar__field">
             <label class="kn-filterbar__label" for="kn-sort">Sort</label>
             <select id="kn-sort" class="kn-input" data-filter="sort">${opt(sorts, this.state.sort)}</select>
           </div>
@@ -470,6 +550,16 @@ class Router {
     const saveKind = saved ? "secondary" : "secondary";
     const matchBadge = this.getMatchBadge(job._score || 0);
 
+    const status = this.getStatus(job.id);
+    let statusColor = "neutral";
+    if (status === "Applied") statusColor = "blue";
+    if (status === "Rejected") statusColor = "red";
+    if (status === "Selected") statusColor = "green";
+
+    const statusOptions = ["Not Applied", "Applied", "Rejected", "Selected"]
+      .map(s => `<option value="${s}" ${s === status ? "selected" : ""}>${s}</option>`)
+      .join("");
+
     return `
       <article class="kn-job-card">
         <div class="kn-job-card__top">
@@ -484,8 +574,11 @@ class Router {
               <span>${this.escapeHtml(job.location)} · ${this.escapeHtml(job.mode)}</span>
             </p>
           </div>
+          </div>
           <div class="kn-job-card__badges">
-            <span class="kn-badge kn-badge--neutral">${this.escapeHtml(job.source)}</span>
+            <select class="kn-status-select kn-status-select--${statusColor}" data-id="${job.id}">
+                ${statusOptions}
+            </select>
           </div>
         </div>
 
@@ -789,6 +882,25 @@ class Router {
         </div>
     `).join('');
 
+    const updates = this.getRecentUpdates();
+    const updatesHTML = updates.length === 0 ? '' : `
+      <div class="kn-digest-updates">
+          <div class="kn-digest-updates__title">Recent Status Updates</div>
+          ${updates.map(u => `
+              <div class="kn-digest-update-item">
+                  <div>
+                      <span style="font-weight:600">${this.escapeHtml(u.title)}</span>
+                      <span style="color:#666"> at ${this.escapeHtml(u.company)}</span>
+                  </div>
+                  <div>
+                      <span class="kn-digest-update-status ${u.status}">${u.status}</span>
+                      <span style="color:#999; font-size:11px; margin-left:8px;">${u.date}</span>
+                  </div>
+              </div>
+          `).join('')}
+      </div>
+    `;
+
     return `
       <div class="kn-page">
          <div class="kn-page__header">
@@ -805,7 +917,7 @@ class Router {
             <div class="kn-digest-body">
                 ${items}
             </div>
-
+            ${updatesHTML}
             <div class="kn-digest-footer">
                 This digest was generated based on your preferences.
                 <div class="kn-digest-actions">

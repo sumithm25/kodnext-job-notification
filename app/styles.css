@@ -480,6 +480,44 @@ h3 {
   border: 1px solid #e0e0e0;
 }
 
+/* Status Badges */
+.kn-status-select {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+}
+
+.kn-status-select--neutral {
+  background: #f0f0f0;
+  color: #666;
+  border-color: #ddd;
+}
+
+.kn-status-select--blue {
+  background: #e3f2fd;
+  color: #0d47a1;
+  border-color: #bbdefb;
+}
+
+.kn-status-select--red {
+  background: #ffebee;
+  color: #c62828;
+  border-color: #ffcdd2;
+}
+
+.kn-status-select--green {
+  background: #e8f5e9;
+  color: #1b5e20;
+  border-color: #c8e6c9;
+}
+
+
 .kn-job-card__header-row {
   display: flex;
   align-items: center;
@@ -666,6 +704,50 @@ h3 {
   color: #999;
   margin-top: 12px;
   display: block;
+}
+
+/* Digest Updates Section */
+.kn-digest-updates {
+  padding: 24px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+
+.kn-digest-updates__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--kn-text);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.kn-digest-update-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  padding: 8px 0;
+  border-bottom: 1px dashed #eee;
+}
+
+.kn-digest-update-item:last-child {
+  border-bottom: none;
+}
+
+.kn-digest-update-status {
+  font-weight: 600;
+}
+
+.kn-digest-update-status.Applied {
+  color: #1565c0;
+}
+
+.kn-digest-update-status.Rejected {
+  color: #c62828;
+}
+
+.kn-digest-update-status.Selected {
+  color: #2e7d32;
 }
 
 .kn-empty-state-actions {
